@@ -88,7 +88,7 @@ test('a quick flick delivered only on pointerup still moves', () => {
 test('long drags can cross several columns and reverse direction', () => {
   const game = setup();
   game.emit('pointerdown'); game.emit('pointermove', 240);
-  assert.equal(game.engine.active.x, 5);
+  assert.equal(game.engine.active.x, 4);
   game.emit('pointermove', 150); game.emit('pointerup', 150);
   assert.equal(game.engine.active.x, 2); assert.equal(game.engine.active.rotation, 0);
 });
@@ -101,8 +101,17 @@ test('movement stays inside the board at either wall', () => {
 });
 test('flick sensitivity scales down with a narrow phone board', () => {
   const game = setup({width: 210});
-  game.emit('pointerdown', 100); game.emit('pointerup', 126);
+  game.emit('pointerdown', 100); game.emit('pointerup', 130);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 0);
+});
+test('short horizontal swipes no longer overshoot and repeated movements consume distance once', () => {
+  const game = setup();
+  game.emit('pointerdown'); game.emit('pointermove', 181);
+  assert.equal(game.engine.active.x, 2);
+  game.emit('pointermove', 190); assert.equal(game.engine.active.x, 3);
+  game.emit('pointermove', 225); assert.equal(game.engine.active.x, 4);
+  game.emit('pointerup', 225); assert.equal(game.engine.active.x, 4);
+  assert.equal(game.engine.active.rotation, 0);
 });
 test('down swipe moves by distance, then returns to ordinary gravity after release', () => {
   const game = setup(), initialY = game.engine.active.y;

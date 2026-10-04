@@ -252,7 +252,8 @@ if (typeof document !== "undefined") {
     event.preventDefault();unlockAudio();if(music.state==="blocked")syncMusic();
     const bounds=boardCanvas.getBoundingClientRect();
     gesture={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,anchorX:event.clientX,anchorY:event.clientY,
-      started:event.timeStamp,midpoint:bounds.left+bounds.width/2,step:Math.max(18,Math.min(36,bounds.width/10)),downStep:Math.max(14,bounds.width/6),axis:null,dragged:false};
+      started:event.timeStamp,midpoint:bounds.left+bounds.width/2,threshold:Math.max(18,Math.min(36,bounds.width/10)),
+      step:Math.max(22,Math.min(45,bounds.width/8)),downStep:Math.max(14,bounds.width/6),axis:null,dragged:false};
     gestureSurface.setPointerCapture(event.pointerId);
   });
   function moveGesture(event){
@@ -260,7 +261,7 @@ if (typeof document !== "undefined") {
     event.preventDefault();
     const dx=event.clientX-gesture.startX,dy=event.clientY-gesture.startY;
     if(Math.hypot(dx,dy)>10)gesture.dragged=true;
-    if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>=gesture.step){
+    if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>=gesture.threshold){
       gesture.axis=Math.abs(dx)>Math.abs(dy)?"x":dy>0?"down":"ignored";
     }
     if(gesture.axis==="x"){
