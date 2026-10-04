@@ -64,6 +64,13 @@ globalThis.rankingTestsDone=(async()=>{
     ui.element('username').value='名前\nabc';assert.equal(ui.ranking.begin(),false);
     ui.element('username').value='😀'.repeat(12);assert.equal(ui.ranking.begin(),true);
   });
+  await test('legacy ranking responses display each name once with its highest score',async()=>{
+    const ui=setup({rows:[{username:'パパ',score:100},{username:'別の人',score:400},{username:'パパ',score:500},{username:'パパ',score:200}]});
+    await flush(); const rows=ui.element('ranking-list').children;
+    assert.equal(rows.length,2); assert.equal(rows[0].children[1].textContent,'パパ');
+    assert.equal(rows[0].children[2].textContent,'500');
+    assert.equal(rows[1].children[0].textContent,'2'); assert.equal(rows[1].children[1].textContent,'別の人');
+  });
   await test('the chosen name is trimmed, remembered and captured for the current play',async()=>{
     const ui=setup({name:'  わいわい  '});await flush();assert.equal(ui.ranking.begin(),true);
     assert.equal(ui.saved.get('jelly-name'),'わいわい');ui.element('username').value='別の名前';

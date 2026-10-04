@@ -64,6 +64,22 @@ globalThis.workerTestsDone = (async () => {
       assert.equal(ranking[1].username,'player1'); assert.equal(ranking[2].score,11);
       assert.equal(ranking.map(row=>row.rank).join(','),'1,2,3,4,5,6,7,8,9,10');
     });
+    await test('old and new repeat plays show only each name highest score before applying the top ten limit', async () => {
+      database.exec('DELETE FROM scores');
+      for(const score of [100,5000,200,5000]) await post({username:'パパ',score});
+      const firstBest=database.prepare('SELECT id FROM scores WHERE username=? AND score=5000 ORDER BY id LIMIT 1').get('パパ');
+      for(let i=0;i<12;i++) await post({username:`player${i}`,score:1000-i});
+      const {ranking}=await (await get()).json();
+      assert.equal(count(),16); assert.equal(ranking.length,10);
+      assert.equal(ranking[0].username,'パパ'); assert.equal(ranking[0].score,5000);
+      assert.equal(ranking[0].id,firstBest.id);
+      assert.equal(new Set(ranking.map(row=>row.username)).size,10);
+      assert.equal(ranking[9].username,'player8');
+      await post({username:' パパ ',score:6000});
+      const updated=await (await get()).json();
+      assert.equal(updated.ranking[0].score,6000);
+      assert.equal(updated.ranking.filter(row=>row.username==='パパ').length,1);
+    });
     await test('preflight, unknown paths, methods and configured origins are handled', async () => {
       assert.equal((await get('/api/scores',{method:'OPTIONS'})).status,204);
       assert.equal((await get('/unknown')).status,404);

@@ -20,7 +20,8 @@ function setup({start = true, width = 300} = {}) {
       elements.set(id, {
         events: {}, classes, hidden: false, value: '',
         classList: {add: name => classes.add(name), remove: name => classes.delete(name)},
-        addEventListener(type, callback) { this.events[type] = callback; },
+        listenerOptions: {},
+        addEventListener(type, callback, options) { this.events[type] = callback; this.listenerOptions[type] = options; },
         setAttribute() {}, blur() {}, getContext: () => context,
         getBoundingClientRect: () => ({left: 20, width}),
         closest: () => ['primary', 'restart', 'overlay', 'music-volume'].includes(id) ? {id} : null,
@@ -103,24 +104,57 @@ test('flick sensitivity scales down with a narrow phone board', () => {
   game.emit('pointerdown', 100); game.emit('pointerup', 126);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 0);
 });
-test('down flick continues soft falling after release and stops at the next piece', () => {
+test('down swipe moves by distance, then returns to ordinary gravity after release', () => {
   const game = setup(), initialY = game.engine.active.y;
   game.emit('pointerdown'); game.emit('pointerup', 150, 270);
   assert.equal(game.engine.active.y, initialY + 1); assert.equal(game.engine.active.rotation, 0);
-  game.frame(); game.frame();
-  assert.equal(game.softFrames.at(-1), true);
-  assert(game.engine.active.y > initialY + 1);
-  for (let i = 0; i < 30; i++) game.frame();
-  assert.equal(game.engine.phase, 'falling'); assert.equal(game.softFrames.at(-1), false);
-  assert(game.engine.board.some(row => row.some(Boolean)));
+  for(let i=0;i<10;i++) game.frame();
+  assert.equal(game.softFrames.at(-1), false); assert.equal(game.engine.active.y, initialY + 1);
+  for(let i=0;i<9;i++) game.frame();
+  assert.equal(game.engine.active.y, initialY + 2);
 });
-test('horizontal gestures can still move and rotate a fast falling piece', () => {
+test('a long down swipe follows the finger without dropping again on release or while held still', () => {
+  const game=setup(), initialY=game.engine.active.y;
+  game.emit('pointerdown'); game.emit('pointermove',150,310);
+  assert.equal(game.engine.active.y,initialY+2);
+  for(let i=0;i<5;i++) game.frame();
+  assert.equal(game.engine.active.y,initialY+2); assert.equal(game.softFrames.at(-1),false);
+  game.emit('pointermove',150,360); assert.equal(game.engine.active.y,initialY+3);
+  game.emit('pointerup',150,360); assert.equal(game.engine.active.y,initialY+3);
+  assert.equal(game.engine.score,3);
+});
+test('vertical swipe steps scale with the rendered board and stop at occupied cells', () => {
+  const game=setup({width:210}), initialY=game.engine.active.y;
+  game.emit('pointerdown'); game.emit('pointerup',150,270);
+  assert.equal(game.engine.active.y,initialY+2);
+  game.engine.board[initialY+4][2]=2;
+  game.emit('pointerdown'); game.emit('pointerup',150,1000);
+  assert.equal(game.engine.active.y,initialY+3); assert(game.engine.fits(game.engine.active));
+});
+test('horizontal movement and rotation remain available after a down swipe', () => {
   const game = setup();
   game.emit('pointerdown'); game.emit('pointerup', 150, 270);
   game.emit('pointerdown'); game.emit('pointerup', 190);
   game.emit('pointerdown', 250); game.emit('pointerup', 250);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 1);
-  game.frame(); assert.equal(game.softFrames.at(-1), true);
+  game.frame(); assert.equal(game.softFrames.at(-1), false);
+});
+test('rapid double taps rotate twice and suppress Safari native touch zoom', () => {
+  const game=setup();
+  assert.equal(game.surface.listenerOptions.touchend.passive,false);
+  for(let i=0;i<2;i++) {
+    game.emit('pointerdown',250); game.emit('pointerup',250);
+    const touch={changedTouches:[{}],touches:[],target:game.element('board'),prevented:false,preventDefault(){this.prevented=true;}};
+    game.surface.events.touchend(touch); assert.equal(touch.prevented,true);
+  }
+  assert.equal(game.engine.active.rotation,2);
+  for(const target of ['primary','overlay','music-volume']) {
+    const touch={changedTouches:[{}],touches:[],target:game.element(target),prevented:false,preventDefault(){this.prevented=true;}};
+    game.surface.events.touchend(touch); assert.equal(touch.prevented,false);
+  }
+  game.click('pause');
+  const touch={changedTouches:[{}],touches:[],target:game.element('board'),prevented:false,preventDefault(){this.prevented=true;}};
+  game.surface.events.touchend(touch); assert.equal(touch.prevented,false);
 });
 test('diagonal flick chooses one direction rather than moving and falling together', () => {
   const game = setup(), initialY = game.engine.active.y;

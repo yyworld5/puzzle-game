@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#e9efe2">
   <title>わいわいゲーム — つなげて、はじける。</title>
   <!-- Update all asset versions together when publishing changes. -->
-  <link rel="stylesheet" href="style.css?v=20261004-3">
-  <script src="music.js?v=20261004-3" defer></script>
-  <script src="ranking.js?v=20261004-3" defer></script>
-  <script src="game.js?v=20261004-3" defer></script>
+  <link rel="stylesheet" href="style.css?v=20261004-4">
+  <script src="music.js?v=20261004-4" defer></script>
+  <script src="ranking.js?v=20261004-4" defer></script>
+  <script src="game.js?v=20261004-4" defer></script>
 </head>
 <body>
   <div class="scene-background" aria-hidden="true"></div>
@@ -48,14 +48,14 @@
                 <button id="primary" class="primary-button">あそぶ <span>→</span></button>
                 <button id="restart" class="text-button" hidden>最初からやり直す</button>
                 <button id="finish-run" class="text-button finish-run-button" hidden>スコアを登録して終了</button>
-                <small id="overlay-hint"><span class="keyboard-hint">PCはキーボードで操作</span><span class="touch-hint">左右・下フリック／左右タップで回転</span></small>
+                <small id="overlay-hint"><span class="keyboard-hint">PCはキーボードで操作</span><span class="touch-hint">左右スワイプで移動・下スワイプで落下／左右タップで回転</span></small>
               </div>
             </div>
           </div>
           <aside class="side-rail">
             <div class="next-card"><span class="frame-flora flora-bottom-right" aria-hidden="true"></span><h2>つぎ</h2><div class="next-well"><canvas id="next" width="100" height="110" aria-label="次の組のピース"></canvas></div></div>
             <div class="next-card"><span class="frame-flora flora-bottom-left" aria-hidden="true"></span><h2>そのつぎ</h2><div class="next-well"><canvas id="next-later" width="100" height="110" aria-label="その次の組のピース"></canvas></div></div>
-            <div class="gesture-help" aria-label="タッチ操作の遊び方"><h2>操作</h2><p>左右フリック<span>移動</span></p><p>下フリック<span>高速落下</span></p><p>左／右タップ<span>左／右回転</span></p></div>
+            <div class="gesture-help" aria-label="タッチ操作の遊び方"><h2>操作</h2><p>左右スワイプ<span>移動</span></p><p>下スワイプ<span>距離に合わせて落下</span></p><p>左／右タップ<span>左／右回転</span></p></div>
           </aside>
         </div>
         <p class="board-note">4つつなげて消す <span>・</span> 連鎖でスコアアップ</p>

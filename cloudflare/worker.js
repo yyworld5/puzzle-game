@@ -44,7 +44,13 @@ export default {
     try {
       if (path === "/api/ranking") {
         const {results} = await env.DB.prepare(
-          "SELECT id, username, score, created_at FROM scores ORDER BY score DESC, created_at ASC, id ASC LIMIT 10"
+          `WITH personal_best AS (
+            SELECT id, username, score, created_at,
+              ROW_NUMBER() OVER (PARTITION BY username ORDER BY score DESC, created_at ASC, id ASC) AS position
+            FROM scores
+          )
+          SELECT id, username, score, created_at FROM personal_best WHERE position = 1
+          ORDER BY score DESC, created_at ASC, id ASC LIMIT 10`
         ).all();
         return reply({ranking: results.map((row, index) => ({rank: index + 1, ...row}))});
       }

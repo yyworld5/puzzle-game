@@ -142,7 +142,7 @@ if (typeof document !== "undefined") {
   let sound=storage.get("jelly-sound","on")==="on", audio, particles=[], calloutTime=0;
   const held = new Map();
   const gestureSurface=$("play-surface");
-  let gesture=null, flickFall=false;
+  let gesture=null;
   const engine = new JellyEngine(Math.random,onEvent);
   const music = new JellyMusic(undefined,Math.random,musicLabel);
   const savedVolume = Number(storage.get("jelly-music-volume",25));
@@ -175,7 +175,7 @@ if (typeof document !== "undefined") {
   function onEvent(type,data){
     if(type==="rotate")tone(340,.04);
     if(type==="land")tone(125,.08,"triangle");
-    if(type==="land"){flickFall=false;cancelGesture();}
+    if(type==="land")cancelGesture();
     if(type==="clear"){
       showCallout(data.chain>1?`${data.chain} CHAIN!\n+${data.points}`:`+${data.points}`);
       [0,4,7].forEach((note,i)=>tone(300*2**((note+data.chain*2)/12),.16,"sine",i*.055));
@@ -228,7 +228,7 @@ if (typeof document !== "undefined") {
     unlockAudio();if(music.state==="blocked")syncMusic();held.set(token,{name,time:0,next:170});action(name);
   }
   function endInput(token){held.delete(token);}
-  function clearInput(){for(const token of [...held.keys()])endInput(token);flickFall=false;cancelGesture();}
+  function clearInput(){for(const token of [...held.keys()])endInput(token);cancelGesture();}
   function syncGestureSurface(){
     gestureSurface.classList[engine.status==="playing"?"add":"remove"]("gestures-active");
     document.body.classList[["playing","paused"].includes(engine.status)?"add":"remove"]("game-active");
@@ -251,8 +251,8 @@ if (typeof document !== "undefined") {
     if(event.target.closest?.("button,input,summary,a,#overlay"))return;
     event.preventDefault();unlockAudio();if(music.state==="blocked")syncMusic();
     const bounds=boardCanvas.getBoundingClientRect();
-    gesture={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,anchorX:event.clientX,
-      started:event.timeStamp,midpoint:bounds.left+bounds.width/2,step:Math.max(18,Math.min(36,bounds.width/10)),axis:null,dragged:false};
+    gesture={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,anchorX:event.clientX,anchorY:event.clientY,
+      started:event.timeStamp,midpoint:bounds.left+bounds.width/2,step:Math.max(18,Math.min(36,bounds.width/10)),downStep:Math.max(14,bounds.width/6),axis:null,dragged:false};
     gestureSurface.setPointerCapture(event.pointerId);
   });
   function moveGesture(event){
@@ -262,13 +262,16 @@ if (typeof document !== "undefined") {
     if(Math.hypot(dx,dy)>10)gesture.dragged=true;
     if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>=gesture.step){
       gesture.axis=Math.abs(dx)>Math.abs(dy)?"x":dy>0?"down":"ignored";
-      // Keep soft fall active after release, until this pair lands or input is cancelled.
-      if(gesture.axis==="down"){flickFall=true;action("down");}
     }
     if(gesture.axis==="x"){
       const distance=event.clientX-gesture.anchorX,steps=Math.trunc(distance/gesture.step);
       for(let i=0;i<Math.min(6,Math.abs(steps));i++)action(steps>0?"right":"left");
       gesture.anchorX+=steps*gesture.step;
+    }
+    if(gesture.axis==="down"){
+      const steps=Math.max(0,Math.floor((event.clientY-gesture.anchorY)/gesture.downStep));
+      for(let i=0;i<Math.min(14,steps);i++)action("down");
+      gesture.anchorY+=steps*gesture.downStep;
     }
   }
   gestureSurface.addEventListener("pointermove",moveGesture);
@@ -278,8 +281,13 @@ if (typeof document !== "undefined") {
     if(engine.canControl()&&!gesture.dragged&&event.timeStamp-gesture.started<=450)action(gesture.startX<gesture.midpoint?"ccw":"cw");
     cancelGesture();
   });
+  // Safari must not treat a quick pair of game taps as its native zoom gesture.
+  gestureSurface.addEventListener("touchend",event=>{
+    if(engine.status==="playing"&&event.changedTouches.length===1&&event.touches.length===0&&
+       !event.target.closest?.("button,input,summary,a,#overlay"))event.preventDefault();
+  },{passive:false});
   for(const type of ["pointercancel","lostpointercapture"])gestureSurface.addEventListener(type,event=>{
-    if(gesture?.pointerId===event.pointerId){flickFall=false;cancelGesture();}
+    if(gesture?.pointerId===event.pointerId)cancelGesture();
   });
   gestureSurface.addEventListener("contextmenu",event=>{if(engine.status==="playing")event.preventDefault();});
   function autoPause(){clearInput();if(engine.status==="playing")pause();}
@@ -381,7 +389,7 @@ if (typeof document !== "undefined") {
   let last=0;
   function frame(now){const dt=Math.min(50,now-last||16);last=now;
     if(engine.status==="playing")for(const input of held.values()){input.time+=dt;if((input.name==="left"||input.name==="right")&&input.time>=input.next){action(input.name);input.next=input.time+65;}}
-    engine.update(dt,flickFall||[...held.values()].some(input=>input.name==="down"));draw(dt);requestAnimationFrame(frame);
+    engine.update(dt,[...held.values()].some(input=>input.name==="down"));draw(dt);requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }

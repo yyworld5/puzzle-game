@@ -75,10 +75,16 @@ class JellyRanking {
       const data = await this.request("/api/ranking");
       if (!Array.isArray(data.ranking)) throw new Error("invalid ranking");
       if (loadId !== this.loadId) return;
-      const rows = data.ranking.slice(0, 10).map((record, index) => {
+      // Also suppress duplicate names while an older Worker is being updated.
+      const best = new Map();
+      for (const record of data.ranking) {
         if (typeof record.username !== "string" || !Number.isSafeInteger(record.score) || record.score < 0) {
           throw new Error("invalid score");
         }
+        const name = record.username.trim().normalize("NFC");
+        if (!best.has(name) || record.score > best.get(name).score) best.set(name, {...record, username: name});
+      }
+      const rows = [...best.values()].sort((a, b) => b.score - a.score).slice(0, 10).map((record, index) => {
         const row = this.list.ownerDocument.createElement("li");
         for (const [className, text] of [
           ["ranking-place", String(index + 1)], ["ranking-name", record.username],
@@ -91,7 +97,7 @@ class JellyRanking {
         return row;
       });
       this.list.replaceChildren(...rows);
-      status.textContent = rows.length ? "ゲーム終了時のスコアを掲載。上位10件を表示。" : "まだ記録がありません。一番乗りを目指そう！";
+      status.textContent = rows.length ? "同じ名前の最高スコアを掲載。上位10件を表示。" : "まだ記録がありません。一番乗りを目指そう！";
     } catch {
       if (loadId === this.loadId) status.textContent = "読み込めませんでした。「更新」で再度お試しください。";
     } finally {
