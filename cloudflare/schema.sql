@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS scores (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL CHECK (length(username) BETWEEN 1 AND 12),
+  score INTEGER NOT NULL CHECK (score >= 0),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS scores_ranking
+ON scores (score DESC, created_at ASC, id ASC);
