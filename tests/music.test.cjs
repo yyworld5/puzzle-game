@@ -27,6 +27,7 @@ globalThis.musicTestsDone = (async () => {
     assert.ok(Music.tracks.length > 0);
     assert.ok(Music.tracks.some(track => track.src === 'assets/bgm/jinchoge.mp3'));
     assert.ok(Music.tracks.some(track => track.src === 'assets/bgm/jinchoge_melody.mp3'));
+    assert.ok(Music.tracks.some(track => track.src === 'assets/bgm/shikikokuka.mp3'));
     for (const track of Music.tracks) {
       const bytes = fs.readFileSync(path.join(root, track.src));
       assert.ok(bytes.length > 100000);

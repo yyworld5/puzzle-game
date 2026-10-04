@@ -75,42 +75,43 @@ test('small finger jitter still registers as one tap', () => {
 });
 test('left and right flicks move without rotating', () => {
   const game = setup();
-  game.emit('pointerdown'); game.emit('pointermove', 190); game.emit('pointerup', 190);
+  game.emit('pointerdown'); game.emit('pointermove', 240); game.emit('pointerup', 240);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 0);
-  game.emit('pointerdown', 190); game.emit('pointermove', 150); game.emit('pointerup', 150);
+  game.emit('pointerdown', 240); game.emit('pointermove', 150); game.emit('pointerup', 150);
   assert.equal(game.engine.active.x, 2); assert.equal(game.engine.active.rotation, 0);
 });
 test('a quick flick delivered only on pointerup still moves', () => {
   const game = setup();
-  game.emit('pointerdown'); game.emit('pointerup', 190);
+  game.emit('pointerdown'); game.emit('pointerup', 240);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 0);
 });
-test('long drags can cross several columns and reverse direction', () => {
+test('long drags still move multiple columns and can reverse without lifting', () => {
   const game = setup();
-  game.emit('pointerdown'); game.emit('pointermove', 240);
-  assert.equal(game.engine.active.x, 4);
+  game.emit('pointerdown'); game.emit('pointermove', 390);
+  assert.equal(game.engine.active.x, 5);
   game.emit('pointermove', 150); game.emit('pointerup', 150);
   assert.equal(game.engine.active.x, 2); assert.equal(game.engine.active.rotation, 0);
 });
 test('movement stays inside the board at either wall', () => {
   const game = setup();
-  game.emit('pointerdown'); game.emit('pointermove', -200); game.emit('pointerup', -200);
+  for(let i=0;i<6;i++){game.emit('pointerdown');game.emit('pointerup',-200);}
   assert.equal(game.engine.active.x, 0); assert(game.engine.fits(game.engine.active));
-  game.emit('pointerdown'); game.emit('pointerup', 1000);
+  for(let i=0;i<6;i++){game.emit('pointerdown');game.emit('pointerup',1000);}
   assert.equal(game.engine.active.x, 5); assert(game.engine.fits(game.engine.active));
 });
 test('flick sensitivity scales down with a narrow phone board', () => {
   const game = setup({width: 210});
-  game.emit('pointerdown', 100); game.emit('pointerup', 130);
+  game.emit('pointerdown', 100); game.emit('pointerup', 160);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 0);
 });
-test('short horizontal swipes no longer overshoot and repeated movements consume distance once', () => {
+test('ordinary swipes move fewer columns while longer swipes still work without double counting release', () => {
   const game = setup();
   game.emit('pointerdown'); game.emit('pointermove', 181);
   assert.equal(game.engine.active.x, 2);
-  game.emit('pointermove', 190); assert.equal(game.engine.active.x, 3);
-  game.emit('pointermove', 225); assert.equal(game.engine.active.x, 4);
-  game.emit('pointerup', 225); assert.equal(game.engine.active.x, 4);
+  game.emit('pointermove', 240); assert.equal(game.engine.active.x, 3);
+  game.emit('pointermove', 390); assert.equal(game.engine.active.x, 5);
+  game.emit('pointerup', 390); assert.equal(game.engine.active.x, 5);
+  game.emit('pointerdown', 390); game.emit('pointerup', 150); assert.equal(game.engine.active.x, 2);
   assert.equal(game.engine.active.rotation, 0);
 });
 test('down swipe moves by distance, then returns to ordinary gravity after release', () => {
@@ -143,7 +144,7 @@ test('vertical swipe steps scale with the rendered board and stop at occupied ce
 test('horizontal movement and rotation remain available after a down swipe', () => {
   const game = setup();
   game.emit('pointerdown'); game.emit('pointerup', 150, 270);
-  game.emit('pointerdown'); game.emit('pointerup', 190);
+  game.emit('pointerdown'); game.emit('pointerup', 240);
   game.emit('pointerdown', 250); game.emit('pointerup', 250);
   assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 1);
   game.frame(); assert.equal(game.softFrames.at(-1), false);
@@ -167,7 +168,7 @@ test('rapid double taps rotate twice and suppress Safari native touch zoom', () 
 });
 test('diagonal flick chooses one direction rather than moving and falling together', () => {
   const game = setup(), initialY = game.engine.active.y;
-  game.emit('pointerdown'); game.emit('pointerup', 220, 240);
+  game.emit('pointerdown'); game.emit('pointerup', 250, 240);
   assert(game.engine.active.x > 2); assert.equal(game.engine.active.y, initialY);
   game.frame(); assert.equal(game.softFrames.at(-1), false);
 });

@@ -6,7 +6,8 @@ class JellyMusic {
     {title:"Puzzling", artist:"Ruskerdax", src:"assets/bgm/puzzling.mp3"},
     {title:"My Street", artist:"congusbongus", src:"assets/bgm/my-street.ogg"},
     {title:"沈丁花（ピアノカラオケ）", artist:"NC J-POP Piano and Instruments for Karaoke", src:"assets/bgm/jinchoge.mp3"},
-    {title:"沈丁花（メロディー）", artist:"Mobile Melody Series", src:"assets/bgm/jinchoge_melody.mp3"}
+    {title:"沈丁花（メロディー）", artist:"Mobile Melody Series", src:"assets/bgm/jinchoge_melody.mp3"},
+    {title:"四季刻歌（ピアノ）", artist:"Mr. D [Piano sheet music]", src:"assets/bgm/shikikokuka.mp3"}
   ];
 
   constructor(media = new Audio(), random = Math.random, notify = () => {}) {
