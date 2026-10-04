@@ -229,7 +229,10 @@ if (typeof document !== "undefined") {
   }
   function endInput(token){held.delete(token);}
   function clearInput(){for(const token of [...held.keys()])endInput(token);flickFall=false;cancelGesture();}
-  function syncGestureSurface(){gestureSurface.classList[engine.status==="playing"?"add":"remove"]("gestures-active");}
+  function syncGestureSurface(){
+    gestureSurface.classList[engine.status==="playing"?"add":"remove"]("gestures-active");
+    document.body.classList[["playing","paused"].includes(engine.status)?"add":"remove"]("game-active");
+  }
   function cancelGesture(){
     const pointerId=gesture?.pointerId;gesture=null;
     if(pointerId!==undefined&&gestureSurface.hasPointerCapture?.(pointerId))gestureSurface.releasePointerCapture(pointerId);

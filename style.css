@@ -144,4 +144,36 @@ footer { display: flex; justify-content: space-between; padding-top: 6px; font-s
 @media (max-width: 760px) and (max-height: 700px) {
   .mascot { display: none; }.app { padding-top: 8px; }.game-layout { padding-top: 12px; }.mobile-stats { margin-bottom: 16px; }.score-label { font-size: 13px; }.score-panel > strong { font-size: 29px; }.best-line { font-size: 10px; }.overlay-card { padding: 12px 9px; }.overlay-card h2 { font-size: 16px; line-height: 1.4; margin: 8px 0; }.overlay-card p { line-height: 1.6; margin-bottom: 8px; }.overlay-card small { margin-top: 8px; }.board-note { margin-top: 14px; }
 }
+@media (max-width: 760px) {
+  .play-area { display: grid; grid-template-columns: minmax(0, 1fr) 108px; gap: 14px 10px; --board-width: min(100%, max(240px, calc((100svh - 240px)/2))); }
+  .mobile-stats { grid-column: 1; grid-row: 1; align-self: center; width: auto; margin: 0; }
+  .board-row { display: contents; }
+  .board-frame { grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+  .side-rail { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 8px; width: 108px; padding: 0; }
+  .side-rail .next-card { flex: none; width: 50px; border-width: 3px; padding: 4px 2px; }
+  .side-rail .next-card + .next-card { margin-top: 0; }
+  .side-rail .next-card h2 { font-size: 9px; margin: 0 0 3px; }
+  .side-rail .next-card .frame-flora { width: 20px; height: 20px; }
+  .side-rail .gesture-help { display: none; }
+  .board-note { grid-column: 1 / -1; grid-row: 3; justify-self: center; margin: 0; }
+  .score-panel { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 5px; padding: 6px 8px; }
+  .score-label { font-size: 11px; }
+  .score-panel > strong { font-size: clamp(22px, 6vw, 28px); line-height: 1.1; letter-spacing: 0; }
+  .best-line { display: flex; flex-direction: column; align-items: flex-end; margin: 0; font-size: 9px; white-space: nowrap; }
+  .score-panel .frame-flora { width: 35px; height: 35px; }
+  .level-strip { margin-top: 8px; padding: 4px; font-size: 9px; }
+  .level-strip strong { font-size: 14px; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Keep the mobile board visible until the current game ends. */
+@media (max-width: 760px) {
+  body.game-active { position: fixed; inset: 0; width: 100%; min-height: 0; height: 100svh; overflow: hidden; overscroll-behavior: none; --play-height: 100svh; }
+  body.game-active .app { height: 100%; overflow: hidden; padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  body.game-active .ranking-panel, body.game-active .audio-settings { display: none; }
+  body.game-active .play-area { --board-width: min(100%, calc((var(--play-height) - 224px - env(safe-area-inset-top) - env(safe-area-inset-bottom))/2)); }
+  body.game-active .gesture-help { display: none; }
+}
+@supports (height: 100dvh) {
+  @media (max-width: 760px) { body.game-active { height: 100dvh; --play-height: 100dvh; } }
+}

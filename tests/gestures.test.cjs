@@ -35,7 +35,7 @@ function setup({start = true, width = 300} = {}) {
     return elements.get(id);
   }
   const browser = {
-    Math, document: {hidden: false, getElementById: element, querySelectorAll: () => [],
+    Math, document: {hidden: false, body: element('document-body'), getElementById: element, querySelectorAll: () => [],
       addEventListener: (type, callback) => { documentEvents[type] = callback; }},
     window: {addEventListener: (type, callback) => { windowEvents[type] = callback; }},
     localStorage: {getItem: () => 'off', setItem() {}},
@@ -198,5 +198,18 @@ test('PC arrow keys, rotation and hard drop remain available', () => {
   game.key('keyup', 'ArrowDown'); game.frame(); assert.equal(game.softFrames.at(-1), false);
   game.key('keydown', 'Space'); game.key('keyup', 'Space');
   assert.equal(game.engine.phase, 'settling');
+});
+test('page stays fixed through play, pause and resume, then unlocks when the game ends', () => {
+  const game = setup({start: false}), body = game.element('document-body');
+  assert.equal(body.classes.has('game-active'), false);
+  game.click('primary'); assert.equal(body.classes.has('game-active'), true);
+  game.click('pause'); assert.equal(body.classes.has('game-active'), true);
+  game.click('primary'); assert.equal(body.classes.has('game-active'), true);
+  game.browser.document.hidden = true; game.documentEvents.visibilitychange();
+  assert.equal(game.engine.status, 'paused'); assert.equal(body.classes.has('game-active'), true);
+  game.browser.document.hidden = false; game.click('primary');
+  game.engine.finish(); assert.equal(body.classes.has('game-active'), false);
+  game.click('primary'); game.click('pause'); game.click('finish-run');
+  assert.equal(body.classes.has('game-active'), false);
 });
 console.log(`${passed} gesture tests passed.`);

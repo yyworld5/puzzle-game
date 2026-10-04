@@ -93,7 +93,7 @@ globalThis.musicTestsDone = (async () => {
       if (!elements.has(id)) elements.set(id, {events:{}, textContent:'', value:'', hidden:false, classList:{add(){},remove(){}}, setAttribute(){}, blur(){}, addEventListener(type, callback){this.events[type]=callback;}, getContext(){return {};}});
       return elements.get(id);
     }
-    const browser = {Audio:Media, Math, Promise, document:{hidden:false, getElementById:element, querySelectorAll:()=>[], addEventListener:(type, callback)=>{documentEvents[type]=callback;}}, window:{addEventListener:(type, callback)=>{windowEvents[type]=callback;}}, localStorage:{getItem:key=>saved.get(key)??null, setItem:(key,value)=>saved.set(key,value)}, requestAnimationFrame(){}};
+    const browser = {Audio:Media, Math, Promise, document:{hidden:false, body:element('document-body'), getElementById:element, querySelectorAll:()=>[], addEventListener:(type, callback)=>{documentEvents[type]=callback;}}, window:{addEventListener:(type, callback)=>{windowEvents[type]=callback;}}, localStorage:{getItem:key=>saved.get(key)??null, setItem:(key,value)=>saved.set(key,value)}, requestAnimationFrame(){}};
     vm.createContext(browser);
     browser.JellyRanking = class { begin() { return true; } show() {} finish() {} };
     const gameSource = fs.readFileSync(path.join(root, 'game.js'), 'utf8').replace('const music = new JellyMusic', 'const music = globalThis.testMusic = new JellyMusic').replace('const engine = new JellyEngine', 'const engine = globalThis.testEngine = new JellyEngine');

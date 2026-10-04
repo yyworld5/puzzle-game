@@ -25,6 +25,7 @@ function setup({name = 'わいわい', rows = [], handler, game = false} = {}) {
       closest:()=>tag==='input'?{}:null};
     if(id)elements.set(id,node);return node;
   }
+  doc.body = element('document-body');
   const storage = {get:(key,fallback)=>saved.get(key)??fallback,set:(key,value)=>saved.set(key,value)};
   const fetcher = async (url,options={}) => {
     calls.push({url,options});
