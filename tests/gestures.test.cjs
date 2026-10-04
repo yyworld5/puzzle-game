@@ -75,9 +75,9 @@ test('small finger jitter still registers as one tap', () => {
 });
 test('left and right flicks move without rotating', () => {
   const game = setup();
-  game.emit('pointerdown'); game.emit('pointermove', 240); game.emit('pointerup', 240);
-  assert.equal(game.engine.active.x, 3); assert.equal(game.engine.active.rotation, 0);
-  game.emit('pointerdown', 240); game.emit('pointermove', 150); game.emit('pointerup', 150);
+  game.emit('pointerdown'); game.emit('pointermove', 270); game.emit('pointerup', 270);
+  assert.equal(game.engine.active.x, 4); assert.equal(game.engine.active.rotation, 0);
+  game.emit('pointerdown', 270); game.emit('pointermove', 150); game.emit('pointerup', 150);
   assert.equal(game.engine.active.x, 2); assert.equal(game.engine.active.rotation, 0);
 });
 test('a quick flick delivered only on pointerup still moves', () => {
@@ -87,7 +87,7 @@ test('a quick flick delivered only on pointerup still moves', () => {
 });
 test('long drags still move multiple columns and can reverse without lifting', () => {
   const game = setup();
-  game.emit('pointerdown'); game.emit('pointermove', 390);
+  game.emit('pointerdown'); game.emit('pointermove', 330);
   assert.equal(game.engine.active.x, 5);
   game.emit('pointermove', 150); game.emit('pointerup', 150);
   assert.equal(game.engine.active.x, 2); assert.equal(game.engine.active.rotation, 0);
@@ -108,10 +108,10 @@ test('ordinary swipes move fewer columns while longer swipes still work without 
   const game = setup();
   game.emit('pointerdown'); game.emit('pointermove', 181);
   assert.equal(game.engine.active.x, 2);
-  game.emit('pointermove', 240); assert.equal(game.engine.active.x, 3);
-  game.emit('pointermove', 390); assert.equal(game.engine.active.x, 5);
-  game.emit('pointerup', 390); assert.equal(game.engine.active.x, 5);
-  game.emit('pointerdown', 390); game.emit('pointerup', 150); assert.equal(game.engine.active.x, 2);
+  game.emit('pointermove', 270); assert.equal(game.engine.active.x, 4);
+  game.emit('pointermove', 330); assert.equal(game.engine.active.x, 5);
+  game.emit('pointerup', 330); assert.equal(game.engine.active.x, 5);
+  game.emit('pointerdown', 330); game.emit('pointerup', 150); assert.equal(game.engine.active.x, 2);
   assert.equal(game.engine.active.rotation, 0);
 });
 test('down swipe moves by distance, then returns to ordinary gravity after release', () => {

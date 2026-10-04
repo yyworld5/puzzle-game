@@ -253,7 +253,7 @@ if (typeof document !== "undefined") {
     const bounds=boardCanvas.getBoundingClientRect();
     gesture={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,anchorX:event.clientX,anchorY:event.clientY,
       started:event.timeStamp,midpoint:bounds.left+bounds.width/2,threshold:Math.max(18,Math.min(36,bounds.width/10)),
-      step:Math.max(40,Math.min(90,bounds.width/4)),downStep:Math.max(14,bounds.width/6),axis:null,dragged:false};
+      step:Math.max(31,Math.min(67.5,bounds.width*3/16)),downStep:Math.max(14,bounds.width/6),axis:null,dragged:false};
     gestureSurface.setPointerCapture(event.pointerId);
   });
   function moveGesture(event){
